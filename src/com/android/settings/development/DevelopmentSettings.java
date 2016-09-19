@@ -124,6 +124,7 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
      */
     public static final String PREF_SHOW = "show";
 
+    private static final String ADVANCED_REBOOT = "advanced_reboot";
     private static final String CLEAR_ADB_KEYS = "clear_adb_keys";
     private static final String ENABLE_TERMINAL = "enable_terminal";
     private static final String KEEP_SCREEN_ON = "keep_screen_on";
@@ -338,6 +339,8 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
 
     private SwitchPreference mShowAllANRs;
 
+    private SwitchPreference mAdvancedReboot;
+
     private SwitchPreference mShowNotificationChannelWarnings;
 
     private ColorModePreference mColorModePreference;
@@ -544,6 +547,11 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
                 SHOW_ALL_ANRS_KEY);
         mAllPrefs.add(mShowAllANRs);
         mResetSwitchPrefs.add(mShowAllANRs);
+
+        mAdvancedReboot = (SwitchPreference) findPreference(
+                ADVANCED_REBOOT);
+        mAllPrefs.add(mAdvancedReboot);
+        mResetSwitchPrefs.add(mAdvancedReboot);
 
         mShowNotificationChannelWarnings = (SwitchPreference) findPreference(
                 SHOW_NOTIFICATION_CHANNEL_WARNINGS_KEY);
@@ -828,6 +836,7 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
         updateImmediatelyDestroyActivitiesOptions();
         updateAppProcessLimitOptions();
         updateShowAllANRsOptions();
+        updateAdvancedRebootOptions();
         updateShowNotificationChannelWarningsOptions();
         mVerifyAppsOverUsbController.updatePreference();
         updateOtaDisableAutomaticUpdateOptions();
@@ -2361,6 +2370,18 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
                 getActivity().getContentResolver(), Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0);
     }
 
+    private void writeAdvancedRebootOptions() {
+        Settings.Secure.putInt(getActivity().getContentResolver(),
+                Settings.Secure.ADVANCED_REBOOT,
+                mAdvancedReboot.isChecked() ? 1 : 0);
+    }
+
+    private void updateAdvancedRebootOptions() {
+        updateSwitchPreference(mAdvancedReboot, Settings.Secure.getInt(
+                getActivity().getContentResolver(),
+                Settings.Secure.ADVANCED_REBOOT, 0) != 0);
+    }
+
     private void writeShowNotificationChannelWarningsOptions() {
         Settings.Global.putInt(getActivity().getContentResolver(),
                 Settings.Global.SHOW_NOTIFICATION_CHANNEL_WARNINGS,
@@ -2551,6 +2572,8 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
             writeImmediatelyDestroyActivitiesOptions();
         } else if (preference == mShowAllANRs) {
             writeShowAllANRsOptions();
+        } else if (preference == mAdvancedReboot) {
+            writeAdvancedRebootOptions();
         } else if (preference == mShowNotificationChannelWarnings) {
             writeShowNotificationChannelWarningsOptions();
         } else if (preference == mForceHardwareUi) {
