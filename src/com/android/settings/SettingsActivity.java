@@ -61,7 +61,6 @@ import com.android.settings.dashboard.DashboardFeatureProvider;
 import com.android.settings.dashboard.DashboardSummary;
 import com.android.settings.development.DevelopmentSettings;
 import com.android.settings.overlay.FeatureFactory;
-import com.android.settings.sim.SimSettings;
 import com.android.settings.search.DynamicIndexableContentMonitor;
 import com.android.settings.search2.SearchFeatureProvider;
 import com.android.settings.wfd.WifiDisplaySettings;
@@ -757,17 +756,6 @@ public class SettingsActivity extends SettingsDrawerActivity
              startActivity(newIntent);
              finish();
              return null;
-        }
-
-        if (fragmentName.equals(SimSettings.class.getName())){
-            Log.i(LOG_TAG, "switchToFragment, launch simSettings  ");
-            Intent provisioningIntent =
-                    new Intent("com.android.settings.sim.SIM_SUB_INFO_SETTINGS");
-            if (!getPackageManager().queryIntentActivities(provisioningIntent, 0).isEmpty()) {
-                startActivity(provisioningIntent);
-            }
-            finish();
-            return null;
         }
 
         if (validate && !isValidFragment(fragmentName)) {
