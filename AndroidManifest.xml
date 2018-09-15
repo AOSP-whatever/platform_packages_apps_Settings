@@ -151,7 +151,7 @@
         <activity android:name=".Settings$NetworkDashboardActivity"
             android:taskAffinity="com.android.settings"
             android:label="@string/network_dashboard_title"
-            android:icon="@drawable/ic_settings_wireless"
+            android:icon="@drawable/ic_settings_network"
             android:parentActivityName="Settings">
             <intent-filter android:priority="1">
                 <action android:name="android.settings.WIRELESS_SETTINGS" />
@@ -1920,6 +1920,12 @@
                 android:exported="true"
                 android:permission="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
 
+        <receiver android:name=".deviceinfo.UsbModeChooserReceiver">
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_STATE"/>
+            </intent-filter>
+        </receiver>>
+
         <activity android:name="Settings$ApnEditorActivity"
                 android:configChanges="orientation|keyboardHidden|screenSize"
                 android:label="@string/apn_edit">
@@ -2407,11 +2413,11 @@
                 android:label="@string/crypt_keeper_encrypt_title">
             <intent-filter android:priority="1">
                 <action android:name="android.app.action.START_ENCRYPTION" />
-                <category android:name="android.intent.category.DEFAULT" /> />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" /> />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
                 android:value="com.android.settings.CryptKeeperSettings" />
@@ -2538,8 +2544,8 @@
 
         <activity android:name=".nfc.HowItWorks"
                   android:label="@string/nfc_payment_settings_title"
+                  android:excludeFromRecents="true"
                   android:parentActivityName="Settings$PaymentSettingsActivity">
-                  android:excludeFromRecents="true">
         </activity>
 
         <activity android:name=".SmsDefaultDialog"

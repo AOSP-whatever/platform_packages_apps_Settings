@@ -25,6 +25,7 @@ import android.os.storage.VolumeInfo;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceViewHolder;
 import android.text.format.Formatter;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
@@ -45,6 +46,7 @@ public class StorageVolumePreference extends Preference {
     private final VolumeInfo mVolume;
 
     private int mColor;
+    private int mIconColor;
     private int mUsedPercent = -1;
 
     // TODO: ideally, VolumeInfo should have a total physical size.
@@ -55,10 +57,13 @@ public class StorageVolumePreference extends Preference {
         mVolume = volume;
         mColor = color;
 
+        mIconColor = Utils.getColorAttr(context, android.R.attr.colorControlNormal);
+
         setLayoutResource(R.layout.storage_volume);
 
         setKey(volume.getId());
-        setTitle(mStorageManager.getBestVolumeDescription(volume));
+        final String fsType = volume.fsType;
+        setTitle(mStorageManager.getBestVolumeDescription(volume) + (TextUtils.isEmpty(fsType) ? "" : " / " + fsType));
 
         Drawable icon;
         if (VolumeInfo.ID_PRIVATE_INTERNAL.equals(volume.getId())) {
@@ -94,10 +99,11 @@ public class StorageVolumePreference extends Preference {
         }
 
         icon.mutate();
-        icon.setTint(mColor);
+        icon.setTint(mIconColor);
         setIcon(icon);
 
         if (volume.getType() == VolumeInfo.TYPE_PUBLIC
+                && !volume.disk.isNonRemovable()
                 && volume.isMountedReadable()) {
             setWidgetLayoutResource(R.layout.preference_storage_action);
         }
@@ -107,7 +113,7 @@ public class StorageVolumePreference extends Preference {
     public void onBindViewHolder(PreferenceViewHolder view) {
         final ImageView unmount = (ImageView) view.findViewById(R.id.unmount);
         if (unmount != null) {
-            unmount.setImageTintList(ColorStateList.valueOf(Color.parseColor("#8a000000")));
+            unmount.setImageTintList(ColorStateList.valueOf(mIconColor));
             unmount.setOnClickListener(mUnmountListener);
         }
 

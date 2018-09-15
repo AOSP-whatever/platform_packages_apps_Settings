@@ -124,6 +124,7 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
      */
     public static final String PREF_SHOW = "show";
 
+    private static final String ADVANCED_REBOOT = "advanced_reboot";
     private static final String CLEAR_ADB_KEYS = "clear_adb_keys";
     private static final String ENABLE_TERMINAL = "enable_terminal";
     private static final String KEEP_SCREEN_ON = "keep_screen_on";
@@ -242,6 +243,8 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
 
     private static final String OTA_DISABLE_AUTOMATIC_UPDATE_KEY = "ota_disable_automatic_update";
 
+    private static final String FORCE_AUTHORIZE_SUBSTRATUM_PACKAGES = "force_authorize_substratum_packages";
+
     private static final int RESULT_DEBUG_APP = 1000;
     private static final int RESULT_MOCK_LOCATION_APP = 1001;
 
@@ -266,6 +269,9 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
     private boolean mHaveDebugSettings;
     private boolean mDontPokeProperties;
     private EnableAdbPreferenceController mEnableAdbController;
+
+    private SwitchPreference mForceAuthorizeSubstratumPackages;
+
     private Preference mClearAdbKeys;
     private SwitchPreference mEnableTerminal;
     private RestrictedSwitchPreference mKeepScreenOn;
@@ -337,6 +343,8 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
     private ListPreference mAppProcessLimit;
 
     private SwitchPreference mShowAllANRs;
+
+    private SwitchPreference mAdvancedReboot;
 
     private SwitchPreference mShowNotificationChannelWarnings;
 
@@ -456,11 +464,13 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
         mForceAllowOnExternal = findAndInitSwitchPref(FORCE_ALLOW_ON_EXTERNAL_KEY);
         mPassword = findPreference(LOCAL_BACKUP_PASSWORD);
         mAllPrefs.add(mPassword);
+        mForceAuthorizeSubstratumPackages = findAndInitSwitchPref(FORCE_AUTHORIZE_SUBSTRATUM_PACKAGES);
 
         if (!mUm.isAdminUser()) {
             disableForUser(mClearAdbKeys);
             disableForUser(mEnableTerminal);
             disableForUser(mPassword);
+            disableForUser(mForceAuthorizeSubstratumPackages);
         }
 
         mDebugAppPref = findPreference(DEBUG_APP_KEY);
@@ -533,6 +543,10 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
         mUSBAudio = findAndInitSwitchPref(USB_AUDIO_KEY);
         mForceResizable = findAndInitSwitchPref(FORCE_RESIZABLE_KEY);
 
+        if (ActivityManager.isLowRamDeviceStatic()) {
+            disableForUser(mForceResizable);
+        }
+
         mImmediatelyDestroyActivities = (SwitchPreference) findPreference(
                 IMMEDIATELY_DESTROY_ACTIVITIES_KEY);
         mAllPrefs.add(mImmediatelyDestroyActivities);
@@ -544,6 +558,11 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
                 SHOW_ALL_ANRS_KEY);
         mAllPrefs.add(mShowAllANRs);
         mResetSwitchPrefs.add(mShowAllANRs);
+
+        mAdvancedReboot = (SwitchPreference) findPreference(
+                ADVANCED_REBOOT);
+        mAllPrefs.add(mAdvancedReboot);
+        mResetSwitchPrefs.add(mAdvancedReboot);
 
         mShowNotificationChannelWarnings = (SwitchPreference) findPreference(
                 SHOW_NOTIFICATION_CHANNEL_WARNINGS_KEY);
@@ -828,6 +847,7 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
         updateImmediatelyDestroyActivitiesOptions();
         updateAppProcessLimitOptions();
         updateShowAllANRsOptions();
+        updateAdvancedRebootOptions();
         updateShowNotificationChannelWarningsOptions();
         mVerifyAppsOverUsbController.updatePreference();
         updateOtaDisableAutomaticUpdateOptions();
@@ -855,6 +875,18 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
         updateBluetoothDisableAbsVolumeOptions();
         updateBluetoothEnableInbandRingingOptions();
         updateBluetoothA2dpConfigurationValues();
+        updateForceAuthorizeSubstratumPackagesOptions();
+    }
+
+    private void writeForceAuthorizeSubstratumPackagesOptions() {
+        Settings.Secure.putInt(getActivity().getContentResolver(),
+                Settings.Secure.FORCE_AUTHORIZE_SUBSTRATUM_PACKAGES,
+                mForceAuthorizeSubstratumPackages.isChecked() ? 1 : 0);
+    }
+
+    private void updateForceAuthorizeSubstratumPackagesOptions() {
+        mForceAuthorizeSubstratumPackages.setChecked(Settings.Secure.getInt(getActivity().getContentResolver(),
+                Settings.Secure.FORCE_AUTHORIZE_SUBSTRATUM_PACKAGES, 0) != 0);
     }
 
     private void resetDangerousOptions() {
@@ -2361,6 +2393,18 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
                 getActivity().getContentResolver(), Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0);
     }
 
+    private void writeAdvancedRebootOptions() {
+        Settings.Secure.putInt(getActivity().getContentResolver(),
+                Settings.Secure.ADVANCED_REBOOT,
+                mAdvancedReboot.isChecked() ? 1 : 0);
+    }
+
+    private void updateAdvancedRebootOptions() {
+        updateSwitchPreference(mAdvancedReboot, Settings.Secure.getInt(
+                getActivity().getContentResolver(),
+                Settings.Secure.ADVANCED_REBOOT, 0) != 0);
+    }
+
     private void writeShowNotificationChannelWarningsOptions() {
         Settings.Global.putInt(getActivity().getContentResolver(),
                 Settings.Global.SHOW_NOTIFICATION_CHANNEL_WARNINGS,
@@ -2368,7 +2412,7 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
     }
 
     private void updateShowNotificationChannelWarningsOptions() {
-        final int defaultWarningEnabled = Build.IS_DEBUGGABLE ? 1 : 0;
+        final int defaultWarningEnabled = Build.TYPE.equals("eng") ? 1 : 0;
         updateSwitchPreference(mShowNotificationChannelWarnings, Settings.Global.getInt(
                 getActivity().getContentResolver(),
                 Settings.Global.SHOW_NOTIFICATION_CHANNEL_WARNINGS, defaultWarningEnabled) != 0);
@@ -2551,6 +2595,8 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
             writeImmediatelyDestroyActivitiesOptions();
         } else if (preference == mShowAllANRs) {
             writeShowAllANRsOptions();
+        } else if (preference == mAdvancedReboot) {
+            writeAdvancedRebootOptions();
         } else if (preference == mShowNotificationChannelWarnings) {
             writeShowNotificationChannelWarningsOptions();
         } else if (preference == mForceHardwareUi) {
@@ -2587,6 +2633,8 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
             writeForceResizableOptions();
         } else if (preference == mBluetoothShowDevicesWithoutNames) {
             writeBluetoothShowDevicesWithoutUserFriendlyNameOptions();
+        } else if (preference == mForceAuthorizeSubstratumPackages) {
+            writeForceAuthorizeSubstratumPackagesOptions();
         } else if (preference == mBluetoothDisableAbsVolume) {
             writeBluetoothDisableAbsVolumeOptions();
         } else if (preference == mBluetoothEnableInbandRinging) {
