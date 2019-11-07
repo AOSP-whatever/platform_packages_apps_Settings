@@ -21,4 +21,8 @@
     <string name="battery_stats_message">Battery usage data will be lost</string>
     <string name="battery_stats_clear">@string/proxy_clear_text</string>
 
+    <!-- Swipe to screenshot -->
+    <string name="swipe_to_screenshot_title">Swipe to screenshot</string>
+    <string name="swipe_to_screenshot_summary">Swipe 3 fingers down the screen to take a screenshot</string>
+
 </resources>
