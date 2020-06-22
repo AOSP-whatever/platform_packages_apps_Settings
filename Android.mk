@@ -56,7 +56,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     settings-logtags \
     zxing-core-1.7 \
     expandablebottombar \
-    kotlin-stdlib
+    kotlin-stdlib \
+    faceunlock_utils
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res \
     packages/apps/DU-Changelog/app/src/main/res \
